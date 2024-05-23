@@ -28,12 +28,14 @@ yesterday = today - timedelta(days=1)
 formatted_yesterday = yesterday.strftime("%Y%m%d")
 file_pattern = f'*{first_day_of_month}_{formatted_yesterday}*.xlsx'
 
-output_filename = f'{outputs_folder}//各渠道同比销售情况_{first_day_of_month[4:]}_{formatted_yesterday[4:]}.xlsx'
-benqi_file = glob.glob(os.path.join(outputs_folder, file_pattern))[0]
+output_filename = f'{outputs_folder}//各渠道同比销售情况_{first_day_of_month[4:]}_{formatted_yesterday[4:]}_{now}.xlsx'
+benqi_file = glob.glob(os.path.join(outputs_folder, file_pattern))[-1]
 last_year_file_pattern = file_pattern.replace('2024', '2023')
-tongqi_file = glob.glob(os.path.join(outputs_folder, last_year_file_pattern))[0]
+tongqi_file = glob.glob(os.path.join(outputs_folder, last_year_file_pattern))[-1]
 benqi_df = pd.read_excel(benqi_file)
 tongqi_df = pd.read_excel(tongqi_file)
+#print(benqi_file,tongqi_file)
+
 tongqi_df = tongqi_df.loc[:,['门店编码','时段','营业天数','流水金额','实收金额','订单数','堂食流水','堂食实收','堂食订单数','外卖流水','外卖实收','外卖订单数','小程序流水','小程序实收','小程序订单数']]
 df_merge= pd.merge(benqi_df, tongqi_df, how='left', left_on='门店编码',right_on='门店编码',suffixes=('_本期', '_同期')).fillna(0)
 df_merge['是否存量'] = df_merge.apply(lambda row: '否' if row['流水金额_本期'] * row['流水金额_同期'] == 0 else '是', axis=1)
